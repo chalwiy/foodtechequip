@@ -1,0 +1,45 @@
+{
+  "name": "FTE SEO regression checks",
+  "on": {
+    "pull_request": {
+      "branches": [
+        "main"
+      ],
+      "paths": [
+        "**/*.html",
+        "*.html",
+        "sitemap.xml",
+        "robots.txt",
+        "CNAME",
+        ".github/**"
+      ]
+    },
+    "workflow_dispatch": null
+  },
+  "permissions": {
+    "contents": "read"
+  },
+  "jobs": {
+    "validate": {
+      "runs-on": "ubuntu-latest",
+      "timeout-minutes": 10,
+      "steps": [
+        {
+          "uses": "actions/checkout@v6",
+          "with": {
+            "fetch-depth": 0,
+            "persist-credentials": false
+          }
+        },
+        {
+          "name": "Regression tests",
+          "run": "python3 -B -m unittest discover -s .github/tests -v"
+        },
+        {
+          "name": "Full-site sitemap dry-run",
+          "run": "python3 -B .github/scripts/maintain.py"
+        }
+      ]
+    }
+  }
+}
