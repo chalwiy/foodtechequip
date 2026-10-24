@@ -31,13 +31,12 @@ def rebuild_and_wait(sha):
         except urllib.error.HTTPError as exc:
             if exc.code!=409 or attempt==11: raise
             time.sleep(10)
-    build_id=build.get('id')
-    if build_id is None: raise RuntimeError('Missing requested Pages build id')
+    # POST /pages/builds returns a URL/status, not a build id (GitHub REST).
+    # Poll latest and verify its commit so an older completed build cannot pass.
     for attempt in range(45):
-        state=pages_api('/builds/'+str(build_id))
-        if state.get('status')=='errored': raise RuntimeError('Pages build failed')
-        if state.get('status')=='built':
-            if state.get('commit')!=sha: raise RuntimeError('Pages built a different commit; rerun on latest main')
+        state=pages_api('/builds/latest')
+        if state.get('commit')==sha and state.get('status')=='errored': raise RuntimeError('Pages build failed')
+        if state.get('status')=='built' and state.get('commit')==sha:
             print('Pages build completed for checked-out commit'); return
         time.sleep(10)
     raise RuntimeError('Pages build timeout; nothing submitted to IndexNow')
@@ -83,3 +82,4 @@ def main():
         seo.submit_indexnow(str(filelist))
 
 if __name__=='__main__':main()
+
