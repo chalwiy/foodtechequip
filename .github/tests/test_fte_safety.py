@@ -62,14 +62,20 @@ class ConfigTests(unittest.TestCase):
         self.assertRegex(config['key'],r'^[a-f0-9]{32}$')
         self.assertNotEqual(config['key'],'425a4655a3dc49f59e4e5bcfebc27999')
     def test_pages_build_wait(self):
-        with patch.object(maintain,'pages_api',side_effect=[{'build_type':'legacy','source':{'branch':'main','path':'/'}},{'id':42},{'status':'built','commit':'abc'}]) as api:
+        with patch.object(maintain,'pages_api',side_effect=[{'build_type':'legacy','source':{'branch':'main','path':'/'}},{'url':'https://api.github.com/repos/chalwiy/foodtechequip/pages/builds/latest','status':'queued'},{'status':'built','commit':'abc'}]) as api:
             maintain.rebuild_and_wait('abc')
         self.assertEqual(api.call_args_list[1].args,('/builds','POST'))
+        self.assertEqual(api.call_args_list[2].args,('/builds/latest',))
     def test_pages_other_mode_rejected(self):
         with patch.object(maintain,'pages_api',return_value={'build_type':'workflow'}):
             with self.assertRaises(RuntimeError):maintain.rebuild_and_wait('abc')
     def test_pages_wrong_commit_rejected(self):
-        with patch.object(maintain,'pages_api',side_effect=[{'source':{'branch':'main','path':'/'}},{'id':42},{'status':'built','commit':'wrong'}]):
+        with patch.object(maintain,'pages_api',side_effect=[{'source':{'branch':'main','path':'/'}},{'status':'queued'}]+[{'status':'built','commit':'wrong'}]*45),patch.object(maintain.time,'sleep'):
             with self.assertRaises(RuntimeError):maintain.rebuild_and_wait('abc')
+    def test_pages_old_build_waits_for_target(self):
+        with patch.object(maintain,'pages_api',side_effect=[{'source':{'branch':'main','path':'/'}},{'status':'queued'},{'status':'built','commit':'old'},{'status':'built','commit':'abc'}]),patch.object(maintain.time,'sleep') as sleep:
+            maintain.rebuild_and_wait('abc')
+        sleep.assert_called_once_with(10)
 
 if __name__=='__main__':unittest.main()
+
