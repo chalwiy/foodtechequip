@@ -86,3 +86,71 @@ html[dir=rtl] .hero-intro{font-size:18px;line-height:2}html[dir=rtl] .site-heade
     margin-inline: -7px;
   }
 }
+
+/* Multi-photo product galleries use one row of scrollable thumbnails. */
+.gallery-view-info {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 4px 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.gallery-view-info [data-gallery-caption] {
+  margin: 0;
+  font-size: inherit;
+  overflow-wrap: anywhere;
+}
+
+.gallery-view-count {
+  flex: none;
+  direction: ltr;
+  unicode-bidi: isolate;
+  font-variant-numeric: tabular-nums;
+}
+
+.gallery-thumbs.gallery-view-strip {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: clamp(64px, 14%, 94px);
+  gap: 8px;
+  margin-top: 10px;
+  padding: 3px 3px 7px;
+  overflow-x: auto;
+}
+
+.gallery-view-strip > button {
+  aspect-ratio: 1;
+  min-inline-size: 0;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.gallery-view-strip > button[aria-pressed=true] {
+  padding: 4px;
+  border: 1px solid var(--teal);
+  box-shadow: inset 0 0 0 1px var(--teal);
+}
+
+.gallery-view-strip > button:focus-visible {
+  outline: 2px solid var(--navy);
+  outline-offset: 1px;
+}
+
+.gallery-view-strip img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* AI illustration disclosure in the enlarged product gallery. */
+.gallery-dialog-caption {
+  margin: 10px 0 0;
+  color: var(--ink);
+  font-size: 13px;
+  text-align: center;
+}
